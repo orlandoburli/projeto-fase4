@@ -1,4 +1,4 @@
-# 📈 Previsão de Ações da Petrobras usando LSTM
+# 📈 Previsão de Ações usando LSTM
 
 Este projeto desenvolve um modelo de rede neural LSTM para prever o valor de fechamento das ações da Petrobrás (PETR4.SA), utilizando dados históricos desde 2005.
 

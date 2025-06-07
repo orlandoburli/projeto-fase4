@@ -36,7 +36,7 @@ def hello():
 
 @app.post("/collect-and-train")
 def collect_and_train(input_data: CollectAndTrainInput):
-    load_data(company=input_data.Company, start_date=input_data.startDate)
+    load_data(company=input_data.company, start_date=input_data.startDate)
     return {"status": "ok", "message": "Data collected and trained successfully."}
 
 
