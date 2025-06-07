@@ -12,9 +12,9 @@ services:
     restart: always
 
   api:
-    build: ../source/api/
+    build: ../source/
     volumes:
-      - ../source/api/app:/app
+      - ../source/api:/app
     ports:
       - "8000:8000"
     environment:

@@ -1,22 +1,26 @@
-# Importação das bibliotecas
+import io
+
 import yfinance as yf
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error, mean_absolute_error
+from sqlalchemy.orm import sessionmaker
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
 import math
 
+from database import save_model_to_db, init_db, KerasModel
 
-def load_data():
+
+def load_data(company, start_date):
     # Parâmetros
-    symbol = 'PETR4.SA'
-    start_date = '2005-01-01'
+    # symbol = 'PETR4.SA'
+    # start_date = '2005-01-01'
     end_date = pd.Timestamp.today().strftime('%Y-%m-%d')
 
     # Coleta dos dados
-    df = yf.download(symbol, start=start_date, end=end_date)
+    df = yf.download(company, start=start_date, end=end_date)
 
     # Coluna de fechamento de valores, removendo valores vazios/nulos
     df = df[['Close']].dropna()
@@ -34,6 +38,7 @@ def load_data():
         return np.array(x2), np.array(y2)
 
     x, y = create_sequences(data_scaled, 60)
+    last_sequence = x[-1]
 
     x = x.reshape((x.shape[0], x.shape[1], 1))
 
@@ -60,8 +65,8 @@ def load_data():
 
     # Evaluations
     predicted = model.predict(X_test)
-    predicted = scaler.inverse_transform(predicted.reshape(-1,1))
-    real = scaler.inverse_transform(y_test.reshape(-1,1))
+    predicted = scaler.inverse_transform(predicted.reshape(-1, 1))
+    real = scaler.inverse_transform(y_test.reshape(-1, 1))
 
     rmse = math.sqrt(mean_squared_error(real, predicted))
     mae = mean_absolute_error(real, predicted)
@@ -69,17 +74,7 @@ def load_data():
     print(f'RMSE: {rmse}')
     print(f'MAE: {mae}')
 
-    # Plot
-    # plt.figure(figsize=(14,6))
-    # plt.plot(real, label='Real')
-    # plt.plot(predicted, label='Previsto')
-    # plt.title('Preço Real vs Preço Previsto')
-    # plt.legend()
-    # plt.show()
+    engine = init_db()
 
-    # Salvar o modelo
-    model.save('lstm_model.keras')
+    save_model_to_db(model=model, company=company, engine=engine, scaler=scaler, last_sequence=last_sequence)
 
-
-if __name__ == '__main__':
-    load_data()
